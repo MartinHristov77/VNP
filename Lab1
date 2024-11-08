@@ -1,0 +1,114 @@
+Requirements
+Import libraries and modules that you are going to use:
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from IPython.display import HTML
+import warnings
+     
+Send HTTP request to the target Website:
+snapshot_url = "https://clevershop.mk/product-category/mobilni-laptopi-i-tableti/"
+snapshot = requests.get(snapshot_url)
+snapshot
+
+check the response status code:
+<Response [200]>
+     
+Parse the response content with BeautifulSoap:
+raw_html = snapshot.text
+print(raw_html)
+soup = BeautifulSoup(raw_html,'html.parser')
+     
+Extract data from the BeautifulSoap object using any selectors, attribute identifiers, etc.
+Product title (selector '.wd-entities-title')
+Product regular price (selector '.woocommerce-Price-amount')
+Product discount price (if available), same selector as regular price
+URL to the product page
+Add to cart button URL
+
+product_titles = soup.select('.wd-entities-title')
+
+     
+Repeat the extraction process for each page of products
+
+
+
+     
+Create a pandas DataFrame with the scraped products
+
+
+     
+Save the dataframe as .csv
+
+
+
+from matplotlib import pyplot as plt
+from selenium.common import NoSuchElementException
+
+# Write your code here. Add as many code boxes as you need.
+# name, price, rating, and availability
+browser.get("https://sandbox.oxylabs.io/products")
+# print(browser.page_source)
+import time
+products = browser.find_elements(By.CSS_SELECTOR,"#__next > main > div > div > div > div:nth-child(2) > div > div")
+time.sleep(1)
+product_list = []
+for product in products:
+    # print(product.text)
+    name = product.find_element(By.CSS_SELECTOR,"a.card-header.css-o171kl.eag3qlw2 > h4").text
+
+    # print(name)
+    price = float(product.find_element(By.CSS_SELECTOR,"div.price-wrapper.css-li4v8k.eag3qlw4").text.replace("€","").replace(",",".").strip())
+    # print(price)
+    rating = len(product.find_elements(By.CSS_SELECTOR,"div.rating.css-1lp4z4h.e15c0rei0 > svg"))
+    # print(rating)
+    try:
+        availability = product.find_element(By.CSS_SELECTOR, ".out-of-stock").text
+    except NoSuchElementException:
+        availability = product.find_element(By.CSS_SELECTOR, ".in-stock").text
+    # print(availability)
+    # break
+    # print(name,price,rating,availability)
+    product_list.append({"name":name,"price":price,"rating":rating,"availability":availability})
+
+df = pd.DataFrame(product_list)
+# df
+plt.figure(figsize=(15, 10)) 
+plt.hist(df['price'], bins=20)
+# plt.xscale('log')
+plt.show() #go pokazuva
+
+
+products = browser.find_elements(By.CSS_SELECTOR,"#__next > main > div > div > div > div:nth-child(2) > div > div")
+links = []
+
+for product in products:
+    link = product.find_element(By.CSS_SELECTOR,"a.card-header.css-o171kl.eag3qlw2").get_attribute("href")
+    # print(link)
+    # break
+    links.append(link)
+
+# print(links)
+descriptions = []
+for link in links:
+    browser.get(link)
+    time.sleep(1)
+    desc = browser.find_element(By.CSS_SELECTOR,"#__next > main > div > div > div > div.product-content-wrapper.css-36ak8o.e1pl6npa12 > div.css-1f150rr.e15c0rei0 > div.css-kqe5aa.emlf3670 > div.product-info-wrapper.css-m2w3q2.emlf3670 > p").text
+    # print(desc)
+    descriptions.append(desc)
+
+     
+
+descriptions_len = []
+for desc in descriptions:
+    descriptions_len.append(len(desc))
+print(descriptions_len)
+
+df_desc = pd.DataFrame(descriptions_len)
+df_desc
+
+df_desc.describe()
+
+
+
+     
